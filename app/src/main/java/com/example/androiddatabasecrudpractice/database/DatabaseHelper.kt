@@ -1,8 +1,10 @@
 package com.example.androiddatabasecrudpractice.database
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.androiddatabasecrudpractice.model.TaskListModel
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
@@ -24,5 +26,26 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
         val DROP_TABLE = "DROP TABLE IF EXISTS $TABLE_NAME"
         p0?.execSQL(DROP_TABLE)
         onCreate(p0)
+    }
+
+    @SuppressLint("Range")
+    fun getAllTask(): List<TaskListModel> {
+        val tasklist = ArrayList<TaskListModel>()
+        val db = writableDatabase
+        val selectQuery = "SELECT * FROM $TABLE_NAME"
+        val cursor = db.rawQuery(selectQuery, null)
+        if (cursor != null) {
+            if (cursor.moveToFirst()){
+                do {
+                    val tasks = TaskListModel()
+                    tasks.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)))
+                    tasks.name = cursor.getString(cursor.getColumnIndex(TASK_NAME))
+                    tasks.details = cursor.getString(cursor.getColumnIndex(TASK_DETAILS))
+                    tasklist.add(tasks)
+                } while (cursor.moveToNext())
+            }
+        }
+        cursor.close()
+        return tasklist
     }
 }
